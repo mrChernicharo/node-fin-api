@@ -14,6 +14,23 @@ app.get("/accounts", (request, response) => {
   return response.json(customers);
 });
 
+app.get("/statement/:cpf", (request, response) => {
+  const { cpf } = request.params;
+
+  const customer = customers.find((customer) => customer.cpf === cpf);
+
+  if (!customer) {
+    return response.json({
+      message: `couldn't find a customer whose cpf is ${cpf}`,
+    });
+  }
+
+  return response.json({
+    name: customer.name,
+    transactions: customer.transactions,
+  });
+});
+
 app.post("/accounts", (request, response) => {
   const { name, cpf } = request.body;
 
@@ -25,7 +42,7 @@ app.post("/accounts", (request, response) => {
     id: uuid(),
     name,
     cpf,
-    statement: [],
+    transactions: [],
   };
   customers.push(customer);
 
