@@ -6,15 +6,7 @@ app.use(express.json());
 
 customers = [];
 
-app.get("/", (request, response) => {
-  return response.json({ message: "ok!" });
-});
-
-app.get("/accounts", (request, response) => {
-  return response.json(customers);
-});
-
-app.get("/statement", (request, response) => {
+function validateCPF(request, response, next) {
   const { cpf } = request.headers;
 
   const customer = customers.find((customer) => customer.cpf === cpf);
@@ -24,6 +16,26 @@ app.get("/statement", (request, response) => {
       message: `couldn't find a customer whose cpf is ${cpf}`,
     });
   }
+
+  // 1. criando a propriedade customer dentro da proópria request
+  request.customer = customer;
+
+  return next();
+}
+
+app.get("/", (request, response) => {
+  return response.json({ message: "ok!" });
+});
+
+app.get("/accounts", (request, response) => {
+  return response.json(customers);
+});
+
+// 2. usando o middleware na rota
+app.get("/statement", validateCPF, (request, response) => {
+  // 3. recuperando o customer da request
+  const { customer } = request;
+  console.log(customer);
 
   return response.json({
     name: customer.name,
