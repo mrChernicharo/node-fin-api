@@ -51,7 +51,7 @@ app.get("/", (request, response) => {
   return response.json({ message: "ok!" });
 });
 
-app.post("/accounts", (request, response) => {
+app.post("/account", (request, response) => {
   const { name, cpf } = request.body;
 
   if (customers.some((customer) => customer.cpf === cpf)) {
@@ -69,7 +69,7 @@ app.post("/accounts", (request, response) => {
   return response.status(200).json(customer);
 });
 
-app.get("/accounts", (request, response) => {
+app.get("/account", (request, response) => {
   return response.json(customers);
 });
 
@@ -142,6 +142,17 @@ app.post("/withdraw", verifyAccountCPFExists, (request, response) => {
   } else {
     return response.status(403).json({ error: "insuficient funds" });
   }
+});
+
+app.put("/account", verifyAccountCPFExists, (request, response) => {
+  const { name } = request.body;
+  const { customer } = request;
+
+  customer.name = name;
+
+  return response
+    .status(201)
+    .json({ message: `name successfully updated to ${name}` });
 });
 
 app.listen(3333, () => {
