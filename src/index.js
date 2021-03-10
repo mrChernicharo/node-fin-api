@@ -69,8 +69,12 @@ app.post("/account", (request, response) => {
   return response.status(200).json(customer);
 });
 
-app.get("/account", (request, response) => {
-  return response.json(customers);
+app.get("/all-accounts", (request, response) => {
+  const responseCustomers = customers.map((customer) => {
+    return { name: customer.name, cpf: customer.cpf, id: customer.id };
+  });
+
+  return response.json(responseCustomers);
 });
 
 app.get("/statement", verifyAccountCPFExists, (request, response) => {
@@ -97,6 +101,14 @@ app.get("/statement/date", verifyAccountCPFExists, (request, response) => {
   );
 
   return response.json(dayTransactions);
+});
+
+app.get("/balance", verifyAccountCPFExists, (request, response) => {
+  const { customer } = request;
+
+  const balance = getBalance(customer.transactions);
+
+  return response.json({ balance });
 });
 
 app.post("/deposit", verifyAccountCPFExists, (request, response) => {
@@ -153,6 +165,21 @@ app.put("/account", verifyAccountCPFExists, (request, response) => {
   return response
     .status(201)
     .json({ message: `name successfully updated to ${name}` });
+});
+
+app.delete("/account", verifyAccountCPFExists, (request, response) => {
+  const { customer } = request;
+
+  customers.splice(customer, 1);
+
+  const remainingCustomers = customers.map((customer) => {
+    return { customer: customer.name, id: customer.id };
+  });
+
+  return response.status(200).json({
+    message: `${customer.name} successfully deleted`,
+    remainingCustomers,
+  });
 });
 
 app.listen(3333, () => {
